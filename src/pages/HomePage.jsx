@@ -1,66 +1,152 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from 'react-router-dom';
 import { ArrowRight, Target, TrendingUp, Users } from 'lucide-react';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import Image3 from '/src/assets/images/image3.jpg';
+import Image4 from '/src/assets/images/image4.jpg';
+
+// ─── Scroll Reveal Hook ───────────────────────────────────────────────────────
+function useScrollReveal(options = {}) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.15, ...options }
+      );
+
+      const el = ref.current;
+      if (el) observer.observe(el);
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return [ref, isVisible];
+}
+
+// ─── Reveal Wrapper ───────────────────────────────────────────────────────────
+function Reveal({ children, delay = 0, direction = 'up', className = '' }) {
+  const [ref, isVisible] = useScrollReveal();
+
+  const directionMap = {
+    up:    'translateY(40px)',
+    down:  'translateY(-40px)',
+    left:  'translateX(50px)',
+    right: 'translateX(-50px)',
+    fade:  'translateY(0px)',
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translate(0,0)' : directionMap[direction],
+        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export function HomePage() {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+
+      {/* ── Hero ── */}
       <section className="pt-32 pb-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Text */}
             <div className="space-y-8">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl tracking-tight">
-                Strategy-Led Digital Marketing for
-                <span className="text-primary"> Growth-Driven</span> Businesses
-              </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
-                We help education-focused brands and ambitious businesses in Nigeria achieve sustainable growth through data-driven digital marketing strategies.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/contact"
-                  className="bg-primary text-black px-8 py-4 text-center hover:bg-primary/90 transition-all inline-flex items-center justify-center gap-2"
-                >
-                  Book a Strategy Call
-                  <ArrowRight size={20} />
-                </Link>
-                <Link
-                  to="/services"
-                  className="border border-primary text-primary px-8 py-4 text-center hover:bg-primary/10 transition-all"
-                >
-                  Our Services
-                </Link>
-              </div>
+              <Reveal direction="up" delay={0}>
+                <h1 className="text-5xl md:text-6xl lg:text-7xl tracking-tight">
+                  Strategy-Led Digital Marketing for
+                  <span className="text-primary"> Growth-Driven</span> Businesses
+                </h1>
+              </Reveal>
+
+              <Reveal direction="up" delay={150}>
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
+                  We help education-focused brands and ambitious businesses in Nigeria achieve
+                  sustainable growth through data-driven digital marketing strategies.
+                </p>
+              </Reveal>
+
+              <Reveal direction="up" delay={250}>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    to="/contact"
+                    className="bg-primary text-black px-8 py-4 text-center
+                    hover:bg-primary/90 transition-all duration-300 ease-out
+                    inline-flex items-center justify-center gap-2
+                    hover:gap-3 hover:shadow-[0_4px_20px_rgba(var(--primary-rgb),0.35)]"
+                  >
+                    Book a Strategy Call
+                    <ArrowRight size={20} />
+                  </Link>
+
+                  <Link
+                    to="/services"
+                    className="border border-primary text-primary px-8 py-4 text-center
+                    hover:bg-primary/10 transition-all duration-300 ease-out"
+                  >
+                    Our Services
+                  </Link>
+                </div>
+              </Reveal>
             </div>
-            <div className="relative">
-              <div className="aspect-[4/5] bg-secondary border border-primary/20 overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1682336869523-2c6859f781cb"
-                  alt="Digital Marketing Strategy"
-                  className="w-full h-full object-cover"
-                />
+
+            {/* Image */}
+            <Reveal direction="left" delay={200}>
+              <div className="relative">
+                <div className="aspect-[4/5] bg-secondary border border-primary/20 overflow-hidden">
+                  <ImageWithFallback
+                    src={Image3}
+                    alt="Digital Marketing Strategy"
+                    className="w-full h-full object-cover
+                    transition-transform duration-500 ease-out hover:scale-105"
+                  />
+                </div>
+                <div className="absolute -bottom-8 -left-8 bg-primary text-black p-8 max-w-xs
+                transition-all duration-300 ease-out hover:scale-105">
+                  <p className="text-3xl font-serif mb-2">98%</p>
+                  <p className="text-sm">Client satisfaction rate</p>
+                </div>
               </div>
-              <div className="absolute -bottom-8 -left-8 bg-primary text-black p-8 max-w-xs">
-                <p className="text-3xl font-serif mb-2">98%</p>
-                <p className="text-sm">Client satisfaction rate</p>
-              </div>
-            </div>
+            </Reveal>
+
           </div>
         </div>
       </section>
 
-      {/* Core Services Overview */}
+      {/* ── Services ── */}
       <section className="py-20 px-6 lg:px-8 bg-secondary">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-16">
-            <h2 className="text-4xl md:text-5xl mb-6">
-              Strategic Solutions, <span className="text-primary">Measurable Results</span>
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              We don't chase trends. We build strategic frameworks that drive real business outcomes.
-            </p>
-          </div>
+
+          <Reveal direction="up" delay={0}>
+            <div className="max-w-3xl mb-16">
+              <h2 className="text-4xl md:text-5xl mb-6">
+                Strategic Solutions, <span className="text-primary">Measurable Results</span>
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                We don't chase trends. We build strategic frameworks that drive real business outcomes.
+              </p>
+            </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
@@ -80,36 +166,44 @@ export function HomePage() {
                 icon: TrendingUp,
               },
             ].map((service, index) => (
-              <div
-                key={index}
-                className="bg-black border border-primary/20 p-8 hover:border-primary/40 transition-colors group"
-              >
-                <service.icon className="w-12 h-12 text-primary mb-6" />
-                <h3 className="text-2xl mb-4">{service.title}</h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  {service.description}
-                </p>
-                <Link
-                  to="/services"
-                  className="text-primary inline-flex items-center gap-2 group-hover:gap-4 transition-all"
+              <Reveal key={index} direction="up" delay={index * 150}>
+                <div
+                  className="bg-black border border-primary/20 p-8
+                  hover:border-primary/40 hover:-translate-y-1
+                  transition-all duration-300 ease-out group h-full"
                 >
-                  Learn More
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
+                  <service.icon className="w-12 h-12 text-primary mb-6 transition-transform duration-300 group-hover:scale-110" />
+                  <h3 className="text-2xl mb-4">{service.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    {service.description}
+                  </p>
+                  <Link
+                    to="/services"
+                    className="text-primary inline-flex items-center gap-2
+                    group-hover:gap-4 transition-all duration-300 ease-out"
+                  >
+                    Learn More
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* What Makes Us Different */}
+      {/* ── Why Section ── */}
       <section className="py-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
             <div>
-              <h2 className="text-4xl md:text-5xl mb-8">
-                Why <span className="text-primary">AbiConnect</span> Digital?
-              </h2>
+              <Reveal direction="up" delay={0}>
+                <h2 className="text-4xl md:text-5xl mb-8">
+                  Why <span className="text-primary">AbiConnect</span> Digital?
+                </h2>
+              </Reveal>
+
               <div className="space-y-8">
                 {[
                   {
@@ -118,93 +212,105 @@ export function HomePage() {
                   },
                   {
                     title: 'Business-Focused',
-                    description: 'We optimize for revenue, not vanity metrics. Your growth is our success.',
+                    description: 'We optimize for revenue, not vanity metrics.',
                   },
                   {
                     title: 'Systems & Sustainability',
-                    description: 'We build scalable marketing systems that deliver consistent, long-term results.',
+                    description: 'We build scalable marketing systems.',
                   },
                 ].map((item, index) => (
-                  <div key={index} className="flex gap-6">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary flex items-center justify-center">
+                  <Reveal key={index} direction="right" delay={index * 150}>
+                    <div className="flex gap-6">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/20 hover:scale-110">
                         <span className="text-primary font-serif text-xl">
                           {String(index + 1).padStart(2, '0')}
                         </span>
                       </div>
+                      <div>
+                        <h3 className="text-xl mb-2">{item.title}</h3>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl mb-2">{item.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
-            <div className="aspect-[4/3] bg-secondary border border-primary/20 overflow-hidden">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1641998148499-cb6b55a3c0d3"
-                alt="Professional Team"
-                className="w-full h-full object-cover"
-              />
-            </div>
+
+            <Reveal direction="left" delay={200}>
+              <div className="aspect-[4/3] bg-secondary border border-primary/20 overflow-hidden">
+                <ImageWithFallback
+                  src={Image4}
+                  alt="Professional Team"
+                  className="w-full h-full object-cover
+                  transition-transform duration-500 ease-out hover:scale-105"
+                />
+              </div>
+            </Reveal>
+
           </div>
         </div>
       </section>
 
-      {/* Trust Building / Process */}
+      {/* ── Process ── */}
       <section className="py-20 px-6 lg:px-8 bg-secondary">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl md:text-5xl mb-6">
-              Our <span className="text-primary">Approach</span>
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              A proven framework that delivers consistent results for ambitious businesses.
-            </p>
-          </div>
+
+          <Reveal direction="up" delay={0}>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl mb-6">
+                Our <span className="text-primary">Approach</span>
+              </h2>
+            </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: '01', title: 'Discovery', description: 'We analyze your market, audience, and objectives.' },
-              { step: '02', title: 'Strategy', description: 'We develop a customized growth roadmap.' },
-              { step: '03', title: 'Execution', description: 'We implement campaigns with precision.' },
-              { step: '04', title: 'Optimization', description: 'We continuously refine for maximum ROI.' },
+              { step: '01', title: 'Discovery' },
+              { step: '02', title: 'Strategy' },
+              { step: '03', title: 'Execution' },
+              { step: '04', title: 'Optimization' },
             ].map((item, index) => (
-              <div key={index} className="text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-black border border-primary flex items-center justify-center">
-                  <span className="text-3xl font-serif text-primary">{item.step}</span>
+              <Reveal key={index} direction="up" delay={index * 150}>
+                <div className="text-center">
+                  <div className="w-20 h-20 mx-auto mb-6 bg-black border border-primary
+                  flex items-center justify-center
+                  transition-all duration-300 hover:scale-110 hover:bg-primary/10">
+                    <span className="text-3xl font-serif text-primary">{item.step}</span>
+                  </div>
+                  <h3 className="text-xl mb-3">{item.title}</h3>
                 </div>
-                <h3 className="text-xl mb-3">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* ── CTA ── */}
       <section className="py-20 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl mb-6">
-            Ready to <span className="text-primary">Scale Your Business</span>?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-            Let's discuss how we can help you achieve sustainable growth through strategic digital marketing.
-          </p>
-          <Link
-            to="/contact"
-            className="bg-primary text-black px-10 py-4 text-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
-          >
-            Book a Strategy Call
-            <ArrowRight size={20} />
-          </Link>
+          <Reveal direction="up" delay={0}>
+            <h2 className="text-4xl md:text-5xl mb-6">
+              Ready to <span className="text-primary">Scale Your Business</span>?
+            </h2>
+          </Reveal>
+
+          <Reveal direction="up" delay={150}>
+            <Link
+              to="/contact"
+              className="bg-primary text-black px-10 py-4 text-lg
+              hover:bg-primary/90 transition-all duration-300 ease-out
+              inline-flex items-center gap-2
+              hover:gap-3 hover:shadow-[0_4px_20px_rgba(var(--primary-rgb),0.35)]"
+            >
+              Book a Strategy Call
+              <ArrowRight size={20} />
+            </Link>
+          </Reveal>
         </div>
       </section>
+
     </div>
   );
 }

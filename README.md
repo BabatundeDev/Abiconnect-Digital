@@ -71,5 +71,3 @@ src/
 **ScrollToTop on Navigation** — A `ScrollToTop` component resets the scroll position to the top on every route change, ensuring a clean page experience.
  
 **SPA Routing Fix** — A `vercel.json` rewrite rule ensures all routes resolve correctly on refresh and direct URL access, preventing 404 errors in production.
- 
----

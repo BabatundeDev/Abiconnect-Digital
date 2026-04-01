@@ -302,7 +302,7 @@ export function ContactPage() {
                     </div>
                     <div>
                       <h3 className="text-xl mb-2">Location</h3>
-                      <p className="text-muted-foreground">Lagos, Nigeria</p>
+                      <p className="text-muted-foreground">Osun, Nigeria</p>
                     </div>
                   </div>
                 </Reveal>
